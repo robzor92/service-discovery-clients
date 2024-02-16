@@ -30,6 +30,8 @@ import org.xbill.DNS.*;
 
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -64,7 +66,7 @@ public class DnsResolver implements ServiceDiscoveryClient {
       } else {
         ((SimpleResolver) resolver).setAddress(new InetSocketAddress(builder.getDnsHost(), builder.getDnsPort()));
       }
-      resolver.setTimeout(4);
+      resolver.setTimeout(Duration.of(10, ChronoUnit.SECONDS));
     } catch (UnknownHostException ex) {
       throw new ServiceDiscoveryGenericException(ex);
     }

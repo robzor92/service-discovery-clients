@@ -6,7 +6,7 @@
 
   <groupId>com.logicalclocks</groupId>
   <artifactId>service-discovery-client</artifactId>
-  <version>0.6-SNAPSHOT</version>
+  <version>0.7-SNAPSHOT</version>
 
   <properties>
     <shaded.dependency.prefix>com.logicalclocks.shaded</shaded.dependency.prefix>
@@ -27,7 +27,7 @@
     <dependency>
       <groupId>dnsjava</groupId>
       <artifactId>dnsjava</artifactId>
-      <version>3.0.2</version>
+      <version>3.5.3</version>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
