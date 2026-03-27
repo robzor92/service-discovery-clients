@@ -25,6 +25,7 @@ import com.logicalclocks.servicediscoverclient.exceptions.ServiceNotFoundExcepti
 import com.logicalclocks.servicediscoverclient.service.Service;
 import com.logicalclocks.servicediscoverclient.service.ServiceQuery;
 import lombok.NonNull;
+import org.xbill.DNS.Record;
 import org.xbill.DNS.Type;
 import org.xbill.DNS.*;
 
@@ -166,11 +167,16 @@ public class DnsResolver implements ServiceDiscoveryClient {
   
   private String getARecord(SRVRecord srvRecord) {
     Lookup lookup = lookup(srvRecord.getTarget(), Type.A);
+    if (lookup.getResult() != Lookup.SUCCESSFUL) {
+      return null;
+    }
     Record[] aRecords = lookup.getAnswers();
-    for (Record r : aRecords) {
-      if (r.getType() == Type.A) {
-        ARecord aRecord = (ARecord) r;
-        return aRecord.getAddress().getHostAddress();
+    if (aRecords != null) {
+      for (Record r : aRecords) {
+        if (r.getType() == Type.A) {
+          ARecord aRecord = (ARecord) r;
+          return aRecord.getAddress().getHostAddress();
+        }
       }
     }
     return null;

@@ -24,6 +24,7 @@ import com.logicalclocks.servicediscoverclient.service.Service;
 import com.logicalclocks.servicediscoverclient.service.ServiceQuery;
 import org.junit.jupiter.api.Test;
 import org.xbill.DNS.*;
+import org.xbill.DNS.Record;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;

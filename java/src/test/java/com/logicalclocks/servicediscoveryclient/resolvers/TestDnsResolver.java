@@ -138,6 +138,55 @@ public class TestDnsResolver {
     }).count();
     assertEquals(2, count);
   }
+
+  @Test
+  public void testSRVButNoARecords() throws Exception {
+    String service = "namenode.service.lc.";
+    int servicePort = 8080;
+    String target0 = "node0.lc.";
+    String target0IP = "10.0.0.1";
+
+    Map<String, Service> expectedServicesMap = new HashMap<>(1);
+    expectedServicesMap.put(target0IP, Service.of(service, target0IP, servicePort));
+
+    Builder resolverBuilder = new Builder(Type.DNS)
+      .withDnsHost("localhost")
+      .withDnsPort(53);
+    DnsResolver client = mock(DnsResolver.class);
+    doCallRealMethod().when(client).init(any(Builder.class));
+    when(client.getService(any())).thenCallRealMethod();
+    client.init(resolverBuilder);
+
+
+    // SRV lookup
+    Lookup mockedSRVLookup = mock(Lookup.class);
+    SRVRecord srvRecord0 = new SRVRecord(Name.fromString(service), 1, 500, 1, 8080,
+      servicePort, Name.fromString(target0));
+
+    Record[] SRVAnswer = new Record[1];
+    SRVAnswer[0] = srvRecord0;
+    when(mockedSRVLookup.getAnswers()).thenReturn(SRVAnswer);
+
+    // A lookup for 10.0.0.1
+    Lookup mockedALookup0 = mock(Lookup.class);
+    when(mockedALookup0.getAnswers()).thenReturn(null);
+
+    when(client.lookup(eq(Name.fromString(service)), eq(org.xbill.DNS.Type.SRV)))
+      .thenReturn(mockedSRVLookup);
+
+    when(client.lookup(eq(Name.fromString(target0)), eq(org.xbill.DNS.Type.A)))
+      .thenReturn(mockedALookup0);
+
+    Stream<Service> answer = client.getService(ServiceQuery.of(service, Collections.emptySet()));
+    assertNotNull(answer);
+    long count = answer.map(s -> {
+      Service expectedService = expectedServicesMap.get(s.getAddress());
+      assertNotNull(expectedService);
+      assertEquals(expectedService, s);
+      return s;
+    }).count();
+    assertEquals(0, count);
+  }
   
   @Test
   public void testUnhealthyServiceMock() throws Exception {

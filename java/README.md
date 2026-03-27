@@ -153,6 +153,31 @@ Assuming that the Consul agent runs on `my-remote-machine` and on port `8501` cr
 an SSH tunnel `ssh -L8501:localhost:8501 user@my-remote-machine`
 
 ### DNS tests
+
+To run some of the tests you need Consul running. You can have Consul running in a VM (< 4.x)
+or inside a Pod (>= 4.x). The idea is the same, forward the UDP DNS port but the steps are different.
+
+#### Consul in Kubernetes
+
+First we need to run `socat` to convert the UDP to TCP because *kubectl port-forward* only forwards TCP
+
+```bash
+kubectl -n hopsworks run udp-bridge --image=alpine/socat --command -- socat "TCP-LISTEN:9999,fork" "UDP:hopsworks-consul-consul-dns:53"
+```
+
+Then you need to forward that port to your computer
+
+```bash
+kubectl -n hopsworks port-forward pod/udp-bridge 9999:9999
+```
+
+Finally, you need to run *socat* locally to translate TCP to UDP
+
+```bash
+socat UDP-RECVFROM:5453,fork,reuseaddr TCP:localhost:9999
+```
+
+#### Consul in VM
 To run tests against a properly configured Consul installation at `my-remote-machine`
 you need to:
 
