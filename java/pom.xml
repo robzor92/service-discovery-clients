@@ -6,12 +6,30 @@
 
   <groupId>com.logicalclocks</groupId>
   <artifactId>service-discovery-client</artifactId>
-  <version>0.7</version>
+  <version>0.7.1</version>
 
   <properties>
     <shaded.dependency.prefix>com.logicalclocks.shaded</shaded.dependency.prefix>
+    <jackson.version>2.21.5</jackson.version>
   </properties>
-  
+
+  <!--consul-client brings jackson in transitively and pins it to 2.12.0, which carries known CVEs.
+      Jackson is relocated under ${shaded.dependency.prefix} by the shade plugin below, so the copy
+      bundled here is private to this jar and can be upgraded independently of any consumer.
+      Imported as a BOM rather than pinned per-artifact because jackson-annotations does not follow
+      the patch version of the rest of the family (2.21 vs 2.21.5).-->
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>${jackson.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
     <dependency>
       <groupId>com.orbitz.consul</groupId>
@@ -63,8 +81,11 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.13.0</version>
         <configuration>
-          <source>17</source>
-          <target>17</target>
+          <!--Java 8 so the artifact stays loadable by every consumer of the hops distribution. The 17
+              target introduced in HWORKS-2699 was incidental to that change and nothing here needs it;
+              release (rather than source/target) also restricts the API surface, so a Java 9+ call
+              cannot compile in by accident.-->
+          <release>8</release>
         </configuration>
       </plugin>
       <plugin>
