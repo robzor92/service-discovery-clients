@@ -6,7 +6,7 @@
 
   <groupId>com.logicalclocks</groupId>
   <artifactId>service-discovery-client</artifactId>
-  <version>0.7.1</version>
+  <version>0.7.2</version>
 
   <properties>
     <shaded.dependency.prefix>com.logicalclocks.shaded</shaded.dependency.prefix>
@@ -162,7 +162,22 @@
                   <pattern>retrofit2/</pattern>
                   <shadedPattern>${shaded.dependency.prefix}.retrofit2.</shadedPattern>
                 </relocation>
+                <relocation>
+                  <pattern>kotlin/</pattern>
+                  <shadedPattern>${shaded.dependency.prefix}.kotlin.</shadedPattern>
+                </relocation>
               </relocations>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <!--This jar is not multi-release (no Multi-Release manifest attribute), so the
+                        versioned copies are never loaded. Shipping them only breaks consumers whose
+                        shade plugin predates ASM support for their class-file version.-->
+                    <exclude>META-INF/versions/**</exclude>
+                  </excludes>
+                </filter>
+              </filters>
             </configuration>
           </execution>
         </executions>
